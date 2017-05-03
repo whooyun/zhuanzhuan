@@ -16,12 +16,12 @@ casper.then(function () {
 	casper.wait(5000, function () {
 		this.click('#J_Quick2Static');
 		this.fill('form#J_Form', {
-			'TPL_username': 'goldfish_sun', //
+			'TPL_username': 'goldfish_sun',
 			'TPL_password': '524942442A'
 		});
 	});
 
-	casper.wait(5000, function () {
+	casper.wait(5000, function () { // slide CAPTCHA
 		if (this.exists('#nc_1_n1z')) {
 			this.mouse.down('#nc_1_n1z');
 			this.mouse.move(x[0], y[0]);
@@ -111,16 +111,26 @@ casper.then(function () {
 			this.mouse.move(x[84], y[84]);
 			this.mouse.move(x[85], y[85]);
 			this.mouse.up('#nc_1_n1z');
-      this.capture('moveOK.png');
+			this.capture('moveOK.png');
 		}
 	});
 });
 
-casper.waitUntilVisible('#nocaptcha a', function () {
+/*
+<!-- use new slide checkcode -->
+<div id="nocaptcha" class="nc-container tb-login" data-nc-idx="1" style="display: block;">
+<div class="errloading">
+<i class="nc_iconfont icon_warn"></i>
+<span class="nc-lang-cnt" data-nc-lang="_error300">哎呀，出错了，点击 <a href="javascript:noCaptcha.reset(1)">刷新</a>再来一次 </span>
+</div>
+</div>
+ */
+
+casper.waitUntilVisible('#nocaptcha a', function () { //if slide checkcode is wroing,i should refresh ,and get a new slide checkcode
 	//this.click('#nocaptcha a');
 	this.evaluate(function () {
 		//document.querySelector('#nocaptcha a').click();
-			noCaptcha.reset(1);
+		noCaptcha.reset(1);
 	});
 	casper.click('#nocaptcha a');
 	console.log('======>' + this.getElementAttribute('#nocaptcha a', 'href'));
@@ -130,20 +140,17 @@ casper.waitUntilVisible('#nocaptcha a', function () {
 });
 
 casper.then(function () {
-
 	casper.wait(5000, function () {
-		console.log('======>提取的内容为：' + this.fetchText('#nocaptcha a'));
-		console.log('======>当前页面地址：' + this.getCurrentUrl());
-    if(this.exists('#nc_1_n1z')||this.exists('#nocaptcha a')){
-      console.log('======>滑动验证不通过，无法提交登录');
-    }else{
-      this.click('#J_SubmitStatic');
-      console.log('======>滑动验证已经通过，开始提交登录');
-    }
+		if (this.exists('#nc_1_n1z') || this.exists('#nocaptcha a')) { // if #nc_1_n1z or #nocaptcha a exists and no login
+			console.log('======>滑动验证不通过，无法提交登录');
+		} else { //login
+			this.click('#J_SubmitStatic');
+			console.log('======>滑动验证已经通过，开始提交登录');
+		}
 	});
-  casper.wait(3000,function(){
-      this.capture('123456.png');
-  });
+	casper.wait(3000, function () {
+		this.capture('123456.png');
+	});
 });
 
 casper.run();
